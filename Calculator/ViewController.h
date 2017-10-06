@@ -20,6 +20,7 @@
 @property bool result;
 
 - (void) insertText: (NSString*) s;
+- (void) setText: (NSString*) s;
 
 @end
 

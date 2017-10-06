@@ -33,17 +33,55 @@
     [_outputLbl setText: [[_outputLbl text] stringByAppendingString:s ] ];
 }
 
+- (void)setText:(NSString *)s {
+    [_outputLbl setText:s];
+}
+
 - (IBAction)numberPressed:(UIButton*)sender {
     if (_result) {
         _result = false;
         [_outputLbl setText:@""];
     }
+    else {
+        NSString *sym = [sender currentTitle];
+        NSString *current = [_outputLbl text];
+        NSString *lastChar = [current substringFromIndex:[current length] - 1];
+        
+        if([lastChar isEqualToString:@"."] && [sym isEqualToString:@"."])
+            return;
+    }
+    
     [self insertText:[sender currentTitle]];
 }
 
 - (IBAction)symbolPressed:(id)sender {
-    [self insertText:[sender currentTitle]];
     _result = false;
+    NSArray *operators = @[@"+", @"-", @"x", @"/"];
+    NSString *sym = [sender currentTitle];
+    NSString *current = [_outputLbl text];
+    NSString *lastChar = [current substringFromIndex:[current length] - 1];
+    
+    if([sym isEqualToString:lastChar])
+        return;
+    
+    if([sym isEqualToString:@"("] && ![operators containsObject:lastChar]) {
+        current = [[current stringByAppendingString:@"x"] stringByAppendingString:sym];
+        [self setText:current];
+        return;
+    }
+    
+    if([operators containsObject:lastChar] && ![sym isEqualToString:@"("]) {
+        printf("replace\n");
+        NSRange range;
+        range.location = [current length] - 1;
+        range.length = 1;
+        
+        current = [current stringByReplacingCharactersInRange:range withString:sym];
+        [self setText:current];
+        return;
+    }
+    
+    [self insertText:[sender currentTitle]];
 }
 
 - (IBAction)equalPressed:(id)sender {
@@ -56,11 +94,17 @@
 }
 
 - (IBAction)deletePressed:(id)sender {
-    if([[_outputLbl text] length] > 0)
-        [_outputLbl setText: [[_outputLbl text] substringToIndex:[[_outputLbl text] length] - 1 ]];
+    if([[_outputLbl text] isEqualToString:@"0.0"])
+        return;
+    
+    if([[_outputLbl text] length] > 1) {
+        [self setText: [[_outputLbl text] substringToIndex:[[_outputLbl text] length] - 1 ]];
+    }
+    else if([[_outputLbl text] length] == 1)
+        [self setText:@"0.0"];
 
 }
 - (IBAction)clearPressed:(id)sender {
-    [_outputLbl setText:@"0.0"];
+    [self setText:@"0.0"];
 }
 @end
